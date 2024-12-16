@@ -6,6 +6,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.itxuexi.netty.utils.JedisPoolUtils;
+import org.itxuexi.netty.utils.ZookeeperRegister;
 import org.itxuexi.netty.websocket.WSServerInitializer;
 import redis.clients.jedis.Jedis;
 
@@ -57,6 +58,11 @@ public class ChatServer {
         // Netty服务启动时, 从redis中查找有没有端口,
         // 无：使用875； 有：累加10
         Integer nettyPort = selectPort(nettyDefaultPort);
+
+        // 注册当前netty服务到zookeeper中
+        ZookeeperRegister.registerNettyServer("server-list",
+                ZookeeperRegister.getLocalIP(),
+                nettyPort);
 
         try {
             // 构建Netty服务器
