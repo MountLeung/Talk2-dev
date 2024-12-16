@@ -151,7 +151,6 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
         UserChannelSession.removeUselessChannels(userId, currentChannelId);
 
         clients.remove(currentChannel);
-
     }
 
     /**
