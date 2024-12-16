@@ -16,7 +16,7 @@ import java.util.Optional;
 /**
  * ChatServer: Netty 服务的启动类(服务器)
  */
-public class ChatServer {
+public class ChatServer2 {
 
     public static final Integer nettyDefaultPort = 875;
     public static final String INIT = "0";
