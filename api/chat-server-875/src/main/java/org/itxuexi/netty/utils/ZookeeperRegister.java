@@ -47,4 +47,46 @@ public class ZookeeperRegister {
         return "192.168.1.3";
     }
 
+    public static void incrementOnlineCounts(NettyServerNode serverNode) throws Exception {
+        dealOnlineCounts(serverNode, 1);
+    }
+
+    public static void decrementOnlineCounts(NettyServerNode serverNode) throws Exception {
+        dealOnlineCounts(serverNode, -1);
+    }
+
+    private static void dealOnlineCounts (NettyServerNode serverNode,
+                                          Integer delta) throws Exception{
+        CuratorFramework zkClient = CuratorConfig.getClient();
+
+        InterProcessReadWriteLock readWriteLock =
+                new InterProcessReadWriteLock(zkClient, "/rw-lock");
+
+        readWriteLock.writeLock().acquire();
+
+        String path = "/server-list";
+        List<String> list = zkClient.getChildren().forPath(path);
+
+        try {
+            for (String node : list) {
+                String nodePath = path + "/" + node;
+                String nodeValue = new String(zkClient.getData().forPath(nodePath));
+                NettyServerNode pendingNode = JsonUtils.jsonToPojo(nodeValue,
+                        NettyServerNode.class);
+
+                if (pendingNode.getIp().equals(serverNode.getIp()) &&
+                        (pendingNode.getPort().intValue() == serverNode.getPort().intValue()))
+                {
+                    pendingNode.setOnlineCounts(pendingNode.getOnlineCounts() + delta);
+                    String nodeJson = JsonUtils.objectToJson(pendingNode);
+                    zkClient.setData().forPath(nodePath, nodeJson.getBytes());
+
+                }
+            }
+        } finally {
+            readWriteLock.writeLock().release();
+        }
+
+    }
+
 }

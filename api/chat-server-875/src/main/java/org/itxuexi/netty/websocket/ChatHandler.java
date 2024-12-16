@@ -12,6 +12,8 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import org.itxuexi.enums.MsgTypeEnum;
 import org.itxuexi.grace.result.GraceJSONResult;
 import org.itxuexi.netty.mq.MessagePublisher;
+import org.itxuexi.netty.utils.JedisPoolUtils;
+import org.itxuexi.netty.utils.ZookeeperRegister;
 import org.itxuexi.pojo.netty.ChatMsg;
 import org.itxuexi.pojo.netty.DataContent;
 import org.itxuexi.pojo.netty.NettyServerNode;
@@ -73,6 +75,16 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
             // websocket初次open, 初始化channel, 关联channel和用户id
             UserChannelSession.putMultiChannels(senderId, currentChannel);
             UserChannelSession.putUserChannelIdRelation(currentChannelId, senderId);
+
+
+
+            // 初次连接后, 该节点下的在线人数累加
+            NettyServerNode minNode = dataContent.getServerNode();
+            ZookeeperRegister.incrementOnlineCounts(minNode);
+
+            // 获得IP和端口, 在redis中记录关联, 以便在前端设备断线后减少在线人数
+            Jedis jedis = JedisPoolUtils.getJedis();
+            jedis.set(senderId, JsonUtils.objectToJson(minNode));
 
         } else if (msgType == MsgTypeEnum.WORDS.type
                 || msgType == MsgTypeEnum.IMAGE.type
@@ -151,6 +163,13 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
         UserChannelSession.removeUselessChannels(userId, currentChannelId);
 
         clients.remove(currentChannel);
+
+        // 在zk中累减在线人数
+        Jedis jedis = JedisPoolUtils.getJedis();
+        NettyServerNode minNode = JsonUtils.jsonToPojo(jedis.get(userId),
+                NettyServerNode.class);
+        ZookeeperRegister.decrementOnlineCounts(minNode);
+
     }
 
     /**
@@ -173,6 +192,13 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
         // 移除多余的会话
         String userId = UserChannelSession.getUserIdByChannelId(currentChannelId);
         UserChannelSession.removeUselessChannels(userId, currentChannelId);
+
+        // 在zk中累减在线人数
+        Jedis jedis = JedisPoolUtils.getJedis();
+        NettyServerNode minNode = JsonUtils.jsonToPojo(jedis.get(userId),
+                NettyServerNode.class);
+        ZookeeperRegister.decrementOnlineCounts(minNode);
+
     }
 
     private static void send(List<Channel> channels, DataContent dataContent, ChatMsg chatMsg) {
