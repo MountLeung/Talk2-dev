@@ -1,0 +1,18 @@
+server:
+  tomcat:
+    max-swallow-size: -1
+    uri-encoding: UTF-8
+
+spring:
+  application:
+    name: file-service
+  profiles:
+    active: dev
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+logging:
+  level:
+    root: info

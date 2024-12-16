@@ -1,0 +1,23 @@
+server:
+  port: 55
+
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        username: nacos
+        password: nacos
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: proj
+    password: lyl123456
+    virtual-host: wechat-dev
+
+minio:
+  endpoint: http://192.168.1.3:9000     # MinIO服务地址
+  fileHost: http://192.168.1.3:9000     # 文件地址host
+  bucketName: wechat
+  accessKey: proj
+  secretKey: lyl123456
