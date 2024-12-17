@@ -1,5 +1,6 @@
 package org.itxuexi.zk;
 
+import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
@@ -8,8 +9,10 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.CuratorCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.itxuexi.pojo.netty.NettyServerNode;
+import org.itxuexi.rabbitmq.RabbitAdminConfig;
 import org.itxuexi.utils.JsonUtils;
 import org.itxuexi.utils.RedisOperator;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +56,8 @@ public class CuratorConfig {
     @Autowired
     private RedisOperator redis;
 
+    @Resource
+    private RabbitAdmin rabbitAdmin;
     /**
      * 注册节点的事件监听
      * @param path
@@ -89,10 +94,14 @@ public class CuratorConfig {
                             NettyServerNode.class);
 
                     System.out.println("old path:" + oldData.getPath() + ", old value:" + oldNode);
-
+                    // 移除残留端口
                     String oldPort = oldNode.getPort() + "";
                     String portKey = "netty_port";
                     redis.hdel(portKey, oldPort);
+
+                    // 移除残留的消息队列
+                    String queueName = "Netty_queue_" + oldPort;
+                    rabbitAdmin.deleteQueue(queueName);
                     break;
                 default:
                     log.info("default");

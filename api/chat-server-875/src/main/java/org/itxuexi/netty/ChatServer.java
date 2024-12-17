@@ -67,8 +67,8 @@ public class ChatServer {
                 ZookeeperRegister.getLocalIP(),
                 nettyPort);
 
-        // 启动消费者进行监听, 队列可以根据动态生成的端口进行动态拼接
-        String queueName = "queue_" + ZookeeperRegister.getLocalIP() + "_" + nettyPort;
+        // 启动消费者进行监听
+        String queueName = "Netty_queue_" + nettyPort;
         RabbitMQConnectUtils mqConnectUtils = new RabbitMQConnectUtils();
         mqConnectUtils.listen(FANOUT_EXCHANGE, queueName);
 
