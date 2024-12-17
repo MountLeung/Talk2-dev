@@ -1,6 +1,11 @@
 package org.itxuexi.netty.websocket;
 
 import io.netty.channel.Channel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import org.itxuexi.pojo.netty.DataContent;
+import org.itxuexi.utils.JsonUtils;
+import org.itxuexi.utils.LocalDateUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,4 +92,20 @@ public class UserChannelSession {
         System.out.println(" ++++++++++++++ ");
     }
 
+    public static void sendToTarget(List<Channel> receiverChannels, DataContent dataContent) {
+
+        ChannelGroup clients = ChatHandler.clients;
+
+        if (receiverChannels == null || receiverChannels.isEmpty()) return;
+
+        for (Channel c : receiverChannels) {
+            Channel foundChannel = clients.find(c.id());
+            if (foundChannel != null) {
+                foundChannel.writeAndFlush(
+                        new TextWebSocketFrame(
+                                JsonUtils.objectToJson(dataContent)));
+            }
+        }
+
+    }
 }

@@ -5,6 +5,7 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.itxuexi.netty.mq.RabbitMQConnectUtils;
 import org.itxuexi.netty.utils.JedisPoolUtils;
 import org.itxuexi.netty.utils.ZookeeperRegister;
 import org.itxuexi.netty.websocket.WSServerInitializer;
@@ -13,6 +14,8 @@ import redis.clients.jedis.Jedis;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.itxuexi.netty.mq.MessagePublisher.FANOUT_EXCHANGE;
 
 /**
  * ChatServer: Netty 服务的启动类(服务器)
@@ -63,6 +66,13 @@ public class ChatServer2 {
         ZookeeperRegister.registerNettyServer("server-list",
                 ZookeeperRegister.getLocalIP(),
                 nettyPort);
+
+        // 启动消费者进行监听, 队列可以根据动态生成的端口进行动态拼接
+        String queueName = "queue_" + ZookeeperRegister.getLocalIP() + "_" + nettyPort;
+        RabbitMQConnectUtils mqConnectUtils = new RabbitMQConnectUtils();
+        mqConnectUtils.listen(FANOUT_EXCHANGE, queueName);
+
+
 
         try {
             // 构建Netty服务器

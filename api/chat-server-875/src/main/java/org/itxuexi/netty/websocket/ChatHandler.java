@@ -99,31 +99,31 @@ public class ChatHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>
 
             chatMsg.setMsgId(sid);
 
-            // 发送消息
-            List<Channel> receiverChannels = UserChannelSession.getMultiChannels(receiverId);
-            if (receiverChannels == null || receiverChannels.isEmpty()) {
-                // receiverChannels 为空, 表示用户离线/断线, 消息不需要发送, 后续可以存储到数据库
-                chatMsg.setIsReceiverOnLine(false);
-            } else {
-                chatMsg.setIsReceiverOnLine(true);
-                if (msgType == MsgTypeEnum.VOICE.type) {
-                    chatMsg.setIsRead(false);
-                }
-                // receiverChannels 不为空, receiver同账户多端接收消息
-                send(receiverChannels, dataContent, chatMsg);
+            // 更新数据
+            if (msgType == MsgTypeEnum.VOICE.type) {
+                chatMsg.setIsRead(false);
             }
 
+            dataContent.setChatMsg(chatMsg);
+            String chatTimeFormat = LocalDateUtils.format(chatMsg.getChatTime(),
+                    LocalDateUtils.DATETIME_PATTERN_2);
+            dataContent.setChatTime(chatTimeFormat);
+
+            // 使用扩展字段记录当前需要被排除发送的channelId
+            dataContent.setExtend(currentChannelId);
+
+            // 把聊天信息作为mq消息进行广播
+            MessagePublisher.sendMsgToNettyServers(JsonUtils.objectToJson(dataContent));
             // 3. 把聊天信息作为mq的消息发送给消费者进行消费处理(保存到数据库)
             MessagePublisher.sendMsgToSave(chatMsg);
-            System.out.println("Saving done!");
         }
 
-        // 4. sender多端同步消息
-        List<Channel> myOtherChannels = UserChannelSession
-                .getMyOtherChannels(senderId, currentChannelId);
-        if (myOtherChannels != null) {
-            send(myOtherChannels, dataContent, chatMsg);
-        }
+//        // 4. sender多端同步消息
+//        List<Channel> myOtherChannels = UserChannelSession
+//                .getMyOtherChannels(senderId, currentChannelId);
+//        if (myOtherChannels != null) {
+//            send(myOtherChannels, dataContent, chatMsg);
+//        }
 
         UserChannelSession.outputMulti();
 

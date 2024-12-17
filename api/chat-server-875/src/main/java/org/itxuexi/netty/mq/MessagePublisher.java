@@ -8,6 +8,9 @@ public class MessagePublisher {
     // 定义交换机的名字
     public static final String TEST_EXCHANGE = "test_exchange";
 
+    // 发布-订阅模式下的交换机名称
+    public static final String FANOUT_EXCHANGE = "fanout_exchange_proj";
+
     // 定义队列的名字
     public static final String TEST_QUEUE = "test_queue";
 
@@ -74,5 +77,14 @@ public class MessagePublisher {
         }
     }
 
+    public static void sendMsgToNettyServers(String msg) throws Exception {
+        RabbitMQConnectUtils connectUtils = new RabbitMQConnectUtils();
+
+        try {
+            connectUtils.sendMsg(msg,FANOUT_EXCHANGE, "");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

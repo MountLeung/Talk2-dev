@@ -1,7 +1,11 @@
 package org.itxuexi.netty.mq;
 
 import com.rabbitmq.client.*;
+import org.itxuexi.netty.websocket.UserChannelSession;
+import org.itxuexi.pojo.netty.DataContent;
+import org.itxuexi.utils.JsonUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +92,70 @@ public class RabbitMQConnectUtils {
 
     public void setConnection(Connection connection) throws Exception {
         getAndSetConnection(false, connection);
+    }
+
+    public void listen(String exchangeName, String queueName) throws Exception {
+        Connection connection = getConnection();
+        Channel channel = connection.createChannel();
+
+        // 定义交换机 使用 FANOUT(发布订阅模式)
+        channel.exchangeDeclare(exchangeName,
+                BuiltinExchangeType.FANOUT,
+                true,
+                false,
+                null);
+
+        // 定义队列
+        channel.queueDeclare(queueName,
+                true,
+                false,
+                false,
+                null);
+
+        // 队列绑定交换机
+        channel.queueBind(queueName, exchangeName, "");
+
+        Consumer consumer = new DefaultConsumer(channel) {
+            /**
+             * 重写消息交付方法
+             */
+            @Override
+            public void handleDelivery(String consumerTag,
+                                       Envelope envelope,
+                                       AMQP.BasicProperties properties,
+                                       byte[] body) throws IOException {
+
+                String msg = new String(body);
+                System.out.println("========== MQ 消费者监听 start ===========");
+                System.out.println(msg);
+                System.out.println("=========== MQ 消费者监听 end ===========");
+
+                String exchange = envelope.getExchange();
+                if (exchange.equalsIgnoreCase(exchangeName)) {
+                    DataContent dataContent = JsonUtils.jsonToPojo(msg, DataContent.class);
+                    String senderId = dataContent.getChatMsg().getSenderId();
+                    String receiverId = dataContent.getChatMsg().getReceiverId();
+
+                    // 广播至所有netty集群节点并且发送聊天消息给待收方
+                    List<io.netty.channel.Channel> receiverChannels =
+                            UserChannelSession.getMultiChannels(receiverId);
+                    UserChannelSession.sendToTarget(receiverChannels, dataContent);
+
+                    // 广播至所有netty集群节点并且同步聊天消息给发送方的其他设备
+                    String currentChannelId = dataContent.getExtend();
+                    List<io.netty.channel.Channel> senderChannels =
+                            UserChannelSession.getMyOtherChannels(senderId, currentChannelId);
+                    UserChannelSession.sendToTarget(senderChannels, dataContent);
+
+                }
+            }
+        };
+        /**
+         * queue：监听的队列名称
+         * autoAck: 是否自动确认， true: 自动告知 mq 消费者已经消费 ？
+         * callback: 回调函数，处理监听到的消息
+         */
+        channel.basicConsume(queueName, true, consumer);
     }
 
     private synchronized Connection getAndSetConnection(boolean isGet, Connection connection) throws Exception {
