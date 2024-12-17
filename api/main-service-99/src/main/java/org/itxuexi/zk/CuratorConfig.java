@@ -5,7 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.CuratorCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.itxuexi.pojo.netty.NettyServerNode;
+import org.itxuexi.utils.JsonUtils;
+import org.itxuexi.utils.RedisOperator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -39,9 +44,64 @@ public class CuratorConfig {
 
         // 启动curator客户端
         client.start();
-//        // 注册监听事件
-//        addWatcher(PATH, client);
+        // 注册监听事件
+        addWatcher(PATH, client);
 
         return client;
     }
+
+    @Autowired
+    private RedisOperator redis;
+
+    /**
+     * 注册节点的事件监听
+     * @param path
+     * @param client
+     */
+    public void addWatcher(String path, CuratorFramework client) {
+
+        CuratorCache curatorCache = CuratorCache.build(client, path);
+        curatorCache.listenable().addListener((type, oldData, data) -> {
+            // type: 当前监听到的事件类型
+            // oldData: 节点更新前的数据、状态
+            // data: 节点更新后的数据、状态
+
+            System.out.println(type.name());
+
+            // System.out.println("new path:" + data.getPath() + ",
+            // new value:" + data.getData());
+
+            //NODE_CREATED
+            //NODE_CHANGED
+            //NODE_DELETED
+
+            switch (type.name()) {
+                case "NODE_CREATED":
+                    log.info("(子)节点创建");
+                    break;
+                case "NODE_CHANGED":
+                    log.info("(子)节点数据变更");
+                    break;
+                case "NODE_DELETED":
+                    log.info("(子)节点删除");
+
+                    NettyServerNode oldNode = JsonUtils.jsonToPojo(new String(oldData.getData()),
+                            NettyServerNode.class);
+
+                    System.out.println("old path:" + oldData.getPath() + ", old value:" + oldNode);
+
+                    String oldPort = oldNode.getPort() + "";
+                    String portKey = "netty_port";
+                    redis.hdel(portKey, oldPort);
+                    break;
+                default:
+                    log.info("default");
+                    break;
+            }
+
+        });
+
+        curatorCache.start();
+    }
+
 }
