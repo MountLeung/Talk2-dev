@@ -3,6 +3,7 @@ package org.itxuexi.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.util.List;
 
@@ -13,9 +14,13 @@ import java.util.List;
  */
 public class JsonUtils {
 
-    // 定义jackson对象
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
+    // 定义 ObjectMapper对象, ObjectMapper是Jackson 库中用于对象序列化和反序列化的核心类。
+    // 将 objectMapper 声明为 final，确保其引用不可变
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    static {
+        // 注册 JavaTimeModule 模块，用于处理 Java 8 的日期时间类型
+        objectMapper.registerModule(new JavaTimeModule());
+    }
     /**
      * 将对象转换成json字符串。
      * @param data
@@ -23,8 +28,7 @@ public class JsonUtils {
      */
     public static String objectToJson(Object data) {
     	try {
-			String string = MAPPER.writeValueAsString(data);
-			return string;
+            return objectMapper.writeValueAsString(data);
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
@@ -40,7 +44,7 @@ public class JsonUtils {
      */
     public static <T> T jsonToPojo(String jsonData, Class<T> beanType) {
         try {
-            T t = MAPPER.readValue(jsonData, beanType);
+            T t = objectMapper.readValue(jsonData, beanType);
             return t;
         } catch (Exception e) {
         	e.printStackTrace();
@@ -55,9 +59,9 @@ public class JsonUtils {
      * @return
      */
     public static <T>List<T> jsonToList(String jsonData, Class<T> beanType) {
-    	JavaType javaType = MAPPER.getTypeFactory().constructParametricType(List.class, beanType);
+    	JavaType javaType = objectMapper.getTypeFactory().constructParametricType(List.class, beanType);
     	try {
-    		List<T> list = MAPPER.readValue(jsonData, javaType);
+    		List<T> list = objectMapper.readValue(jsonData, javaType);
     		return list;
 		} catch (Exception e) {
 			e.printStackTrace();

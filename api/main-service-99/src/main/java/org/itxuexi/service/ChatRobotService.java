@@ -1,6 +1,7 @@
 package org.itxuexi.service;
 
 import com.baidubce.appbuilder.base.exception.AppBuilderServerException;
+import org.itxuexi.pojo.PromptMessage;
 import org.itxuexi.pojo.netty.ChatMsg;
 import org.itxuexi.utils.PagedGridResult;
 
@@ -20,7 +21,13 @@ public interface ChatRobotService {
      * 处理用户向聊天机器人发起的对话
      */
     public String prompt(String prompt, String userId)
-            throws IOException, AppBuilderServerException;
+            throws Exception;
+
+    /**
+     * 保存对话消息
+     * @param promptMessage
+     */
+    void saveMsg(PromptMessage promptMessage);
 
 //    /**
 //     * 查询聊天信息列表

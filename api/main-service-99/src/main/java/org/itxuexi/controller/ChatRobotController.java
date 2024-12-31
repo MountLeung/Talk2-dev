@@ -23,7 +23,7 @@ public class ChatRobotController extends BaseInfoProperties {
     @PostMapping("prompt")
     public GraceJSONResult prompt(HttpServletRequest request,
                                   @RequestParam String prompt)
-            throws IOException, AppBuilderServerException {
+            throws Exception {
 
         String userId = request.getHeader(HEADER_USER_ID);
 

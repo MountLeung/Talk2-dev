@@ -3,6 +3,9 @@ package org.itxuexi.rabbitmq;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +39,8 @@ public class RabbitAdminConfig {
         factory.setUsername(username);
         factory.setPassword(password);
         factory.setVirtualHost(virtualHost);
-
+        // 设置连接池大小
+        factory.setChannelCacheSize(10);
         return factory;
     }
 
@@ -50,4 +54,24 @@ public class RabbitAdminConfig {
         return new RabbitAdmin(connectionFactory);
     }
 
+    /**
+     * 用于将 Java对象转换为消息，以及将消息转换为 Java对象
+     * @return
+     */
+    @Bean
+    public MessageConverter messageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    /**
+     * 用于发送和接收消息的核心类
+     * @param connectionFactory
+     * @return
+     */
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setMessageConverter(messageConverter());
+        return rabbitTemplate;
+    }
 }
