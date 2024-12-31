@@ -2,7 +2,6 @@ package org.itxuexi.service;
 
 import org.itxuexi.pojo.netty.ChatMsg;
 import org.itxuexi.utils.PagedGridResult;
-import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * <p>

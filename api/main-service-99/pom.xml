@@ -34,5 +34,18 @@
             <artifactId>curator-recipes</artifactId>
             <version>5.5.0</version>
         </dependency>
+
+        <!-- 百度智能云相关依赖 -->
+        <dependency>
+            <groupId>com.baidubce</groupId>
+            <artifactId>appbuilder</artifactId>
+            <version>0.9.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.a3test.component</groupId>
+            <artifactId>idworker-snowflake</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 </project>

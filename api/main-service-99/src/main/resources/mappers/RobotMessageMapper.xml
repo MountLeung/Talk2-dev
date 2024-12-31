@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.itxuexi.mapper.RobotMessageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="org.itxuexi.pojo.PromptMessage">
+        <id column="id" property="id" />
+        <result column="prompter_id" property="prompterId" />
+        <result column="content" property="content" />
+        <result column="content_type" property="contentType" />
+        <result column="prompt_time" property="promptTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, prompter_id, content, content_type, prompt_time
+    </sql>
+
+</mapper>
