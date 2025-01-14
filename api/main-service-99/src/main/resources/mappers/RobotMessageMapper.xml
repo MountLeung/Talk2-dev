@@ -9,11 +9,12 @@
         <result column="content" property="content" />
         <result column="content_type" property="contentType" />
         <result column="prompt_time" property="promptTime" />
+        <result column="conversation_id" property="conversationId" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, prompter_id, content, content_type, prompt_time
+        id, prompter_id, content, content_type, prompt_time, conversation_id
     </sql>
 
 </mapper>

@@ -19,6 +19,7 @@ public class BaseInfoProperties {
 
     public static final String HEADER_USER_ID = "headerUserId";
     public static final String HEADER_USER_TOKEN = "headerUserToken";
+    public static final String HEADER_CONVERSATION_ID = "Conversation-ID";
 
     public static final String SYMBOL_DOT = ".";       // 小圆点，无意义，可用可不用
 
@@ -61,6 +62,8 @@ public class BaseInfoProperties {
 
     // 某个字典code下所对应的所有字典列表
     public static final String REDIS_DATA_DICTIONARY_ITEM_LIST = "redis_data_dictionary_item_list";
+
+    public static final String SESSION_CONVERSATION_ID = "conversation_id";
 
     // 企业信息相关
     public static final String REDIS_COMPANY_BASE_INFO = "company_base_info";

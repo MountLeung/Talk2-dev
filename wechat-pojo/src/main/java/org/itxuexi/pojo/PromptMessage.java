@@ -40,6 +40,19 @@ public class PromptMessage implements Serializable {
      */
     private LocalDateTime promptTime;
 
+    /**
+     * 对话ID, 对同一次问答的提问与回答消息一致
+     */
+    private String conversationId;
+
+    public String getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
+
     public String getId() {
         return id;
     }
@@ -88,6 +101,7 @@ public class PromptMessage implements Serializable {
                 ", content='" + content + '\'' +
                 ", contentType=" + contentType +
                 ", promptTime=" + promptTime +
+                ", conversationId='" + conversationId + '\'' +
                 '}';
     }
 }

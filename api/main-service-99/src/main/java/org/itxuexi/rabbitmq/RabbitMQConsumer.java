@@ -1,5 +1,6 @@
 package org.itxuexi.rabbitmq;
 
+import com.rabbitmq.client.Channel;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.itxuexi.pojo.PromptMessage;
@@ -17,6 +18,9 @@ public class RabbitMQConsumer {
 
     @Resource
     private ChatMessageService chatMessageService;
+
+    @Resource
+    private ChatRobotService chatRobotService;
 
     /**
      * 对Netty聊天消息的消费
@@ -36,9 +40,6 @@ public class RabbitMQConsumer {
             chatMessageService.saveMsg(chatMsg);
         }
     }
-
-    @Resource
-    private ChatRobotService chatRobotService;
 
     /**
      * 对LLM问答消息的消费
