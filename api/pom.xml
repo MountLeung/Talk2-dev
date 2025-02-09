@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.itxuexi</groupId>
-        <artifactId>wechat-dev</artifactId>
+        <artifactId>talk2-dev</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>org.itxuexi</groupId>
-            <artifactId>wechat-pojo</artifactId>
+            <artifactId>talk2-pojo</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>

@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.itxuexi</groupId>
-        <artifactId>wechat-dev</artifactId>
+        <artifactId>talk2-dev</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>wechat-common</artifactId>
+    <artifactId>talk2-common</artifactId>
     <dependencies>
         <!-- 引入SpringBoot 依赖-->
         <dependency>

@@ -12,7 +12,6 @@ import jakarta.annotation.Resource;
 import org.itxuexi.base.BaseInfoProperties;
 import org.itxuexi.enums.PromptContentTypeEnum;
 import org.itxuexi.mapper.RobotMessageMapper;
-import org.itxuexi.pojo.ChatMessage;
 import org.itxuexi.pojo.PromptMessage;
 import org.itxuexi.rabbitmq.MessageLLMPublisher;
 import org.itxuexi.service.ChatRobotService;
