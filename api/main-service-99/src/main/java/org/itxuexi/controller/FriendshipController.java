@@ -17,6 +17,7 @@ import org.itxuexi.utils.PagedGridResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("friendship")
@@ -108,6 +109,10 @@ public class FriendshipController extends BaseInfoProperties {
      */
     @GetMapping("isBlack")
     public GraceJSONResult isBlack(String friendId1st, String friendId2nd) {
+        if (!Pattern.matches("^[0-9]{19}$", friendId1st) || !Pattern.matches("^[0-9]{19}$", friendId2nd)) {
+            return GraceJSONResult.error();
+        }
+
         // 需要进行两次查询： A拉黑B， B拉黑A
         // 只要符合其中之一, 则双方发送的消息不可送达
         return GraceJSONResult.ok(

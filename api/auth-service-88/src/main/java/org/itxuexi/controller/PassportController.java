@@ -79,7 +79,6 @@ public class PassportController extends BaseInfoProperties {
         // redis.set(REDIS_USER_TOKEN + ":" + user.getId(), uToken);
         // 本方式允许多端登录
         redis.set(REDIS_USER_TOKEN + ":" + uToken, user.getId());
-
         // 5. 返回用户数据
         UsersVO usersVO = new UsersVO();
         BeanUtils.copyProperties(user, usersVO);

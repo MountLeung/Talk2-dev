@@ -81,6 +81,8 @@ public class FriendshipServiceImpl extends BaseInfoProperties implements Friends
         friendship.setIsBlack(yesOrNo.type);
         friendship.setUpdatedTime(LocalDateTime.now());
 
+        deleteCache(myId, friendId);
+
         friendshipMapper.update(friendship, updateWrapper);
     }
 
@@ -99,10 +101,19 @@ public class FriendshipServiceImpl extends BaseInfoProperties implements Friends
 
         friendshipMapper.delete(deleteWrapper2);
 
+        deleteCache(myId, friendId);
     }
 
     @Override
     public boolean isBlackEachOther(String friendId1st, String friendId2nd) {
+
+        String cacheKey = "isBlack:" + friendId1st + ":" + friendId2nd;
+        String cacheKey2 = "isBlack:" + friendId2nd+ ":" + friendId1st;
+        String cacheResult = redis.get(cacheKey);
+        if (cacheResult.equals(YesOrNo.YES)) {
+            return true;
+        }
+
         QueryWrapper<Friendship> queryWrapper1 = new QueryWrapper<>();
         queryWrapper1.eq("my_id", friendId1st);
         queryWrapper1.eq("friend_id", friendId2nd);
@@ -117,7 +128,18 @@ public class FriendshipServiceImpl extends BaseInfoProperties implements Friends
 
         Friendship friendship2nd = friendshipMapper.selectOne(queryWrapper2);
 
-        return friendship1st != null || friendship2nd != null;
+        String result = friendship1st != null || friendship2nd != null ?
+                YesOrNo.YES.value : YesOrNo.NO.value;
+        redis.set(cacheKey, result);
+        redis.set(cacheKey2, result);
 
+        return result.equals(YesOrNo.YES.value);
+    }
+
+    private void deleteCache(String friendId1st, String friendId2nd) {
+        String cacheKey = "isBlack:" + friendId1st + ":" + friendId2nd;
+        String cacheKey2 = "isBlack:" + friendId2nd + ":" + friendId1st;
+        redis.del(cacheKey);
+        redis.del(cacheKey2);
     }
 }
