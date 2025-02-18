@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.itxuexi.base.BaseInfoProperties;
 import org.itxuexi.grace.result.ResponseStatusEnum;
+import org.itxuexi.utils.AESUtil;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
@@ -58,7 +59,13 @@ public class SecurityFilterToken extends BaseInfoProperties implements GlobalFil
         // 5. 判断header中是否有token, 对用户请求进行判断拦截
         HttpHeaders headers = exchange.getRequest().getHeaders();
         String userId = headers.getFirst(HEADER_USER_ID);
-        String userToken = headers.getFirst(HEADER_USER_TOKEN);
+        String userToken;
+        // AES 解密
+        try {
+            userToken = AESUtil.decrypt(headers.getFirst(HEADER_USER_TOKEN));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         log.info("userId = {}", userId);
         log.info("userToken = {}", userToken);
 

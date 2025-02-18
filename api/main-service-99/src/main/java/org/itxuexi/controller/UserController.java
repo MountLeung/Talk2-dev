@@ -10,6 +10,7 @@ import org.itxuexi.pojo.Users;
 import org.itxuexi.pojo.bo.ModifyUserBO;
 import org.itxuexi.pojo.vo.UsersVO;
 import org.itxuexi.service.UsersService;
+import org.itxuexi.utils.AESUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +28,7 @@ public class UserController extends BaseInfoProperties {
     private static final int FRIEND_CIRCLE_BG = 3;
 
     @PostMapping("modify")
-    public GraceJSONResult modify(@RequestBody ModifyUserBO userBO){
+    public GraceJSONResult modify(@RequestBody ModifyUserBO userBO) throws Exception {
 
         // 修改用户信息
         usersService.modifyUserInfo(userBO);
@@ -38,7 +39,7 @@ public class UserController extends BaseInfoProperties {
         return GraceJSONResult.ok(usersVO);
     }
 
-    private UsersVO getUserInfo(String userId, boolean needToken) {
+    private UsersVO getUserInfo(String userId, boolean needToken) throws Exception {
         // 查询最新的用户信息
         Users latestUser = usersService.getById(userId);
 
@@ -47,41 +48,42 @@ public class UserController extends BaseInfoProperties {
 
         if (needToken) {
             String uToken = TOKEN_USER_PREFIX + SYMBOL_DOT + UUID.randomUUID();
-
+            // AES算法对令牌加密，假设已经通过非对称加密算法完成了密钥交换
+            String encrypt = AESUtil.encrypt(uToken);
             // 本方式只允许用户单端登录
             // redis.set(REDIS_USER_TOKEN + ":" + userId, uToken);
             // 本方式允许多端登录
             redis.set(REDIS_USER_TOKEN + ":" + uToken, userId);
-            usersVO.setUserToken(uToken);
+            usersVO.setUserToken(encrypt);
         }
 
         return usersVO;
     }
 
     @PostMapping("get")
-    public GraceJSONResult get(@RequestParam("userId") String userId) {
+    public GraceJSONResult get(@RequestParam("userId") String userId) throws Exception {
         return GraceJSONResult.ok(getUserInfo(userId, false));
     }
 
     @PostMapping("updateFace")
     public GraceJSONResult updateFace(@RequestParam("userId") String userId,
-                                      @RequestParam("face") String face){
+                                      @RequestParam("face") String face) throws Exception {
         return GraceJSONResult.ok(commonDealUpdateUserInfo(userId, face, FACE));
     }
 
     @PostMapping("updateFriendCircleBg")
     public GraceJSONResult updateFriendCircleBg(@RequestParam("userId") String userId,
-                                      @RequestParam("friendCircleBg") String friendCircleBg){
+                                      @RequestParam("friendCircleBg") String friendCircleBg) throws Exception {
         return GraceJSONResult.ok(commonDealUpdateUserInfo(userId, friendCircleBg, FRIEND_CIRCLE_BG));
     }
 
     @PostMapping("updateChatBg")
     public GraceJSONResult updateChatBg(@RequestParam("userId") String userId,
-                                                @RequestParam("chatBg") String chatBg){
+                                                @RequestParam("chatBg") String chatBg) throws Exception {
         return GraceJSONResult.ok(commonDealUpdateUserInfo(userId, chatBg, CHAT_BG));
     }
 
-    private UsersVO commonDealUpdateUserInfo(String userId, String img, int flag) {
+    private UsersVO commonDealUpdateUserInfo(String userId, String img, int flag) throws Exception {
         ModifyUserBO userBO = new ModifyUserBO();
         userBO.setUserId(userId);
         if (flag == FACE) {
