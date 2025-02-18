@@ -110,7 +110,7 @@ public class FriendshipServiceImpl extends BaseInfoProperties implements Friends
         String cacheKey = "isBlack:" + friendId1st + ":" + friendId2nd;
         String cacheKey2 = "isBlack:" + friendId2nd+ ":" + friendId1st;
         String cacheResult = redis.get(cacheKey);
-        if (cacheResult.equals(YesOrNo.YES)) {
+        if (cacheResult.equals(YesOrNo.YES.value)) {
             return true;
         }
 
