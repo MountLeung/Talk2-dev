@@ -130,8 +130,8 @@ public class FriendshipServiceImpl extends BaseInfoProperties implements Friends
 
         String result = friendship1st != null || friendship2nd != null ?
                 YesOrNo.YES.value : YesOrNo.NO.value;
-        redis.set(cacheKey, result);
-        redis.set(cacheKey2, result);
+        redis.setByDays(cacheKey, result, 5);
+        redis.setByDays(cacheKey2, result, 5);
 
         return result.equals(YesOrNo.YES.value);
     }
