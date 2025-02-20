@@ -81,9 +81,9 @@ public class FriendshipServiceImpl extends BaseInfoProperties implements Friends
         friendship.setIsBlack(yesOrNo.type);
         friendship.setUpdatedTime(LocalDateTime.now());
 
-        deleteCache(myId, friendId);
-
         friendshipMapper.update(friendship, updateWrapper);
+
+        deleteCache(myId, friendId);
     }
 
     @Transactional
